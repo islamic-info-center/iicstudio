@@ -2,10 +2,9 @@
 # (same /exec URL) whenever Code.gs or appsscript.json changes on main.
 name: Deploy Apps Script
 
+# Paused until Google sign-in is set up: runs only when started by hand.
+# To turn it on, add back:  push: { branches: [main], paths: ["apps-script/**"] }
 on:
-  push:
-    branches: [main]
-    paths: ["apps-script/**"]
   workflow_dispatch:
 
 concurrency: apps-script

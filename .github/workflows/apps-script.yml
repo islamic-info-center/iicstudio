@@ -1,0 +1,37 @@
+# Uploads apps-script/ to Google Apps Script and updates the live web app deployment
+# (same /exec URL) whenever Code.gs or appsscript.json changes on main.
+name: Deploy Apps Script
+
+on:
+  push:
+    branches: [main]
+    paths: ["apps-script/**"]
+  workflow_dispatch:
+
+concurrency: apps-script
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Write clasp credentials
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+        run: |
+          if [ -z "$CLASPRC_JSON" ]; then echo "CLASPRC_JSON secret is missing"; exit 1; fi
+          printf '%s' "$CLASPRC_JSON" > ~/.clasprc.json
+      - name: Push code
+        working-directory: apps-script
+        run: npx -y @google/clasp@3.4.1 push --force
+      - name: Update the live web app
+        working-directory: apps-script
+        env:
+          # The deployment behind the /exec URL in site/config.js
+          DEPLOYMENT_ID: AKfycbxuk_6Cv1ApulharIPn2sM0mV73bboiO6QZcyRy2MxY1t4tikcHoNwCb28LxuPnV18
+          MSG: ${{ github.event.head_commit.message }}
+        run: |
+          npx -y @google/clasp@3.4.1 deploy --deploymentId "$DEPLOYMENT_ID" --description "$(printf '%s' "${MSG:-manual}" | head -n 1)"

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>لوحة الإدارة · IIC Studio</title>
+<link rel="icon" href="img/iic-studio.png">
+<link rel="preload" href="fonts/thmanyahsans-Regular.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="styles.css?v=20261024152904">
+<link rel="stylesheet" href="theme-glass.css?v=20261026170000">
+<script>try{if(localStorage.getItem("ics-mode")==="dark")document.documentElement.dataset.mode="dark"}catch(e){}</script>
+<style>
+/* Admin layout: navy side menu, content column; stacks on a phone */
+.admin-shell{display:flex;flex-wrap:wrap;min-height:100vh}
+.side{flex:1 1 230px;max-width:260px;background:var(--navy);color:var(--navy-ink);padding:22px 16px;display:flex;flex-direction:column;gap:6px}
+.side .logo{margin-bottom:18px;height:58px;width:auto;align-self:flex-start}
+.side button{border:0;background:transparent;color:var(--navy-muted);text-align:start;border-radius:10px;padding:12px 14px;font-size:15px;cursor:pointer}
+.side button[aria-current="page"]{background:var(--navy-2);color:#fff;font-weight:700}
+.side .me{margin-top:auto;border-top:1px solid var(--navy-2);padding-top:14px;display:grid;gap:2px;font-size:14px}
+.side .me small{color:var(--teal)}
+.side .me a,.side .me button{color:var(--navy-muted);font-size:13px;padding:4px 0;text-decoration:underline}
+.content{flex:999 1 560px;min-width:0;padding:26px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px));display:grid;gap:18px;align-content:start}
+.content > header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.content > section{display:grid;gap:18px}
+.content > header h1{margin:0;font-family:var(--display);font-size:30px}
+.table{background:var(--tile);border-radius:var(--r);overflow-x:auto}
+.table table{width:100%;border-collapse:collapse;font-size:14px;min-width:980px}
+.table th,.table td{padding:12px 14px;text-align:start;border-bottom:1px solid var(--line);vertical-align:middle}
+.table th{font-size:12.5px;font-weight:500;color:var(--muted);background:var(--sunk)}
+.table tr:last-child td{border-bottom:0}
+.table td.n{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+#programs-rows td:nth-last-child(-n+3){white-space:nowrap}
+.eps-box{display:grid;gap:10px}
+.eps-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13.5px;font-weight:700}
+#eps-bulk{display:grid;gap:8px}#eps-bulk textarea{width:100%;font:inherit;font-size:13px;border-radius:12px;padding:10px;resize:vertical}
+.eps-bulk-acts{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.eplinks{display:grid;gap:7px}
+.eplinks .row{display:grid;grid-template-columns:40px 1fr;gap:8px;align-items:center}
+.eplinks .row b{display:grid;place-items:center;height:36px;border-radius:10px;background:var(--sunk);font-size:14px}
+.eplinks .row.ok b{background:#1E9E5E;color:#fff}
+.eplinks .row.bad input{border-color:#C62828}
+.eplinks input{height:36px;font-size:13.5px}
+#programs-rows .plink{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--blue);color:#fff;font-size:9px;text-decoration:none;vertical-align:middle;margin-inline-start:4px}
+/* bookings: every row one tidy height; the script shows as a one-line preview and opens in full in a reading window */
+#bookings-rows td{vertical-align:middle;white-space:nowrap}
+#bookings-rows td.txt{max-width:22em}
+#bookings-rows a.contact{color:var(--ink);text-decoration:none;border-bottom:1px dotted rgba(38,96,168,.4)}
+#bookings-rows a.contact:hover{color:var(--blue)}
+#bookings-rows td.txt.notes{max-width:14em}
+#bookings-rows .one{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink)}
+#bookings-rows .read-btn{display:inline-flex;align-items:center;gap:6px;margin-top:6px;font-size:12.5px;font-weight:500;color:var(--blue);background:rgba(38,96,168,.08);border:1px solid rgba(38,96,168,.22);border-radius:999px;padding:4px 12px;cursor:pointer}
+#bookings-rows .read-btn:hover{background:rgba(38,96,168,.16)}
+#bookings-rows .read-btn svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+:root[data-mode="dark"] #bookings-rows .read-btn{color:#A9C4EE;background:rgba(127,168,232,.12);border-color:rgba(127,168,232,.3)}
+/* the roles guide under the users table: one colored card per role */
+.roles-title{margin:26px 0 12px;font-family:var(--display);font-size:20px}
+.roles-guide{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.roles-guide > li{--c:var(--blue);--c-soft:var(--blue-soft);background:var(--tile);border-radius:var(--r);border-inline-start:5px solid var(--c);padding:14px 18px}
+.roles-guide > li.admin{--c:#5B47C2;--c-soft:#EAE7F7}
+.roles-guide > li.editor{--c:var(--blue);--c-soft:var(--blue-soft)}
+.roles-guide > li.crew{--c:#B8862F;--c-soft:var(--gold-soft)}
+.roles-guide > li.team{--c:#2E9C8C;--c-soft:var(--teal-soft)}
+:root[data-mode="dark"] .roles-guide > li.admin{--c:#A99BF0;--c-soft:#2F2860}
+:root[data-mode="dark"] .roles-guide > li.crew{--c:var(--gold)}
+:root[data-mode="dark"] .roles-guide > li.team{--c:var(--teal)}
+.roles-guide h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:8px;color:var(--c)}
+.roles-guide h3 .dot{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+.roles-guide h3 small{font-size:12.5px;font-weight:500;color:var(--muted)}
+.roles-guide ul{margin:0;padding-inline-start:22px;display:grid;gap:4px;font-size:14px;color:var(--ink)}
+.roles-guide ul li::marker{color:var(--c)}
+.roles-guide ul li.no{color:var(--muted)}
+.roles-guide ul li.no::marker{content:"✕  ";color:var(--muted)}
+.read-meta{display:flex;flex-wrap:wrap;gap:8px}
+.read-meta span{font-size:13px;border-radius:999px;padding:5px 12px;background:rgba(38,96,168,.08);color:var(--ink)}
+.read-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;font-size:15.5px;max-height:55vh;overflow:auto;padding:16px 18px;border-radius:14px;background:rgba(255,255,255,.7);border:1px solid rgba(38,96,168,.15)}
+:root[data-mode="dark"] .read-text{background:rgba(0,0,0,.25);border-color:rgba(255,255,255,.12)}
+.read-sec{font-size:13px;font-weight:500;color:var(--blue);margin:0}
+.table td .sub{display:block;font-size:12.5px;color:var(--muted)}
+.table .acts{display:flex;gap:6px;justify-content:flex-end;white-space:nowrap}
+.role{display:inline-block;font-size:12px;border-radius:6px;padding:3px 9px}
+.role.admin{background:#EAE7F7;color:#251B57}
+.role.editor{background:var(--blue-soft);color:var(--blue)}
+.role.team{background:var(--teal-soft);color:var(--teal-ink)}
+.role.crew{background:var(--gold-soft);color:var(--gold-ink)}
+.form input:disabled,.form select:disabled{opacity:.55}
+.login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px}
+.login{width:min(420px,100%);display:grid;gap:16px}
+.login .logo{height:64px;width:auto;justify-self:center}
+.login h1{margin:0;text-align:center;font-family:var(--display);font-size:26px}
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom,0px));inset-inline-start:50%;transform:translateX(50%);background:var(--navy);color:#fff;border-radius:12px;padding:12px 18px;font-size:14px;z-index:20}
+[dir="ltr"] .toast{transform:translateX(-50%)}
+.empty{padding:24px;text-align:center;color:var(--muted)}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.vtools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn.xls{background:linear-gradient(180deg,#2DBE72,#1E7F48);border:0;color:#fff;font-weight:600;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 10px 22px -10px rgba(30,127,72,.8)}
+.btn.xls::before{content:"";display:inline-block;width:15px;height:15px;margin-inline-end:7px;vertical-align:-2px;background:no-repeat center/contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3v12M7 10l5 5 5-5M5 21h14'/%3E%3C/svg%3E")}
+.vin{border:1px solid rgba(38,96,168,.2);border-radius:12px;padding:9px 12px;font:inherit;background:rgba(255,255,255,.85);color:var(--ink);width:10em}
+.vin.wide{width:18em;font-size:13px}
+:root[data-mode="dark"] .vin{background:rgba(0,0,0,.28);border-color:rgba(255,255,255,.14);color:#F2F1FA}
+.vfoot{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+/* reports: the A4 page at full size, shrunk to fit the column; downloads are made from the full-size page */
+.rtools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.rtools .vin{width:auto;min-width:8em}
+.rep-frame{position:relative;width:min(100%,620px);aspect-ratio:794/1123;border-radius:14px;overflow:hidden;box-shadow:0 18px 40px -22px rgba(31,23,71,.45)}
+.rep-page{position:absolute;top:0;left:0;width:794px;height:1123px;transform-origin:0 0}
+.rep-busy{opacity:.55;pointer-events:none}
+#rep-png.cta{background-image:linear-gradient(180deg,#3A7BCB,#2660A8);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),0 8px 18px -8px rgba(38,96,168,.85)}
+:root[data-mode="dark"] #rep-png.cta{background-image:linear-gradient(180deg,#5B93DB,#2F6DBA)}
+.vtools .cta:disabled{opacity:.55;cursor:default}
+.pcell{display:inline-flex;align-items:center;gap:10px}
+/* the report's monthly figures, on the programs page */
+.mstats{display:grid;gap:12px;min-width:0}
+.mstats .mh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.mstats h2{margin:0;font-family:var(--display);font-size:20px}
+.mstats .mh .hint{margin-top:4px}
+.mstats .gt{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:-4px}
+.mstats .gh{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.mstats .gh .gt{margin:0}
+.mstats .seg button{padding:6px 14px;font-size:13px}
+.mstats .grp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.mstats .grp.two{grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,2fr)}
+.mstats label{display:grid;gap:6px;font-size:13.5px;font-weight:500}
+.mstats .grp .vin{width:100%;min-width:0;font-size:18px;text-align:center}
+.mstats .note{align-self:end;padding-bottom:12px}
+@media (max-width:760px){.mstats .grp,.mstats .grp.two{grid-template-columns:repeat(2,minmax(0,1fr))}.mstats .note{grid-column:1/-1;padding:0}}
+.picon{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;color:#fff;flex:none}
+.picon svg{width:19px;height:19px;fill:currentColor}
+.picon b{font-size:15px}
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="login-view" hidden>
+  <form class="tile login form" id="login-form">
+    <img class="logo logo-light" src="img/iic-studio-clear.png" alt="IIC Studio" width="712" height="458"><img class="logo logo-dark" src="img/iic-studio-white.png" alt="IIC Studio" width="712" height="458">
+    <div style="display:flex;justify-content:flex-end"><button type="button" class="btn small" data-lang-toggle>English</button></div>
+    <h1 data-a="loginTitle">دخول لوحة الإدارة</h1>
+    <p class="notice" id="demo-note" hidden></p>
+    <label><span data-a="email">البريد الإلكتروني</span><input name="email" type="email" required autocomplete="username" dir="ltr"></label>
+    <label><span data-a="password">كلمة المرور</span><input name="password" type="password" required autocomplete="current-password"></label>
+    <p class="msg err" id="login-err" hidden></p>
+    <button type="submit" class="btn primary" data-a="signIn">دخول</button>
+    <a href="index.html" class="hint" style="text-align:center" data-a="backSite">العودة إلى الموقع</a>
+  </form>
+</div>
+
+<div class="admin-shell" id="app-view" hidden>
+  <aside class="side">
+    <img class="logo" src="img/iic-studio-white.png" alt="IIC Studio" width="712" height="458">
+    <button type="button" data-tab="programs" data-need="crew" data-a="tabPrograms">البرامج</button>
+    <button type="button" data-tab="bookings" data-need="team" data-a="tabBookings">حجوزات الاستوديو</button>
+    <button type="button" data-tab="views" data-need="editor" data-a="tabViews">المشاهدات</button>
+    <button type="button" data-tab="reports" data-need="editor" data-a="tabReports">التقارير</button>
+    <button type="button" data-tab="users" data-need="admin" data-a="tabUsers">المستخدمون والصلاحيات</button>
+    <button type="button" data-tab="account" data-need="team" data-a="tabAccount">حسابي</button>
+    <div class="me"><b id="me-name"></b><small id="me-role"></small><a href="index.html" data-a="viewSite">عرض الموقع</a><button type="button" data-lang-toggle>English</button><button type="button" id="logout" data-a="logout">تسجيل الخروج</button></div>
+  </aside>
+
+  <main class="content">
+    <section data-panel="programs" hidden>
+      <header><h1 data-a="tabPrograms">البرامج</h1><button type="button" class="cta" id="add-program" data-a="addProgram">+ برنامج جديد</button></header>
+      <p class="hint" id="programs-hint"></p>
+      <div class="tile mstats" id="month-stats" hidden>
+        <div class="mh"><div><h2 data-a="monthTitle">أرقام الشهر للتقرير</h2><p class="hint" data-a="monthHint"></p></div>
+          <div class="vtools"><select id="ms-month" class="vin" data-aa="repPeriod" aria-label="الشهر"></select><button type="button" class="cta" id="ms-save" data-a="saveViews">حفظ أرقام الشهر</button></div></div>
+        <div class="gh"><div class="gt" id="ms-gt">البرامج والحلقات</div><div class="seg" id="ms-mode" role="group"><button type="button" data-msmode="auto" aria-pressed="true" data-a="msAuto">تلقائي + إضافات</button><button type="button" data-msmode="manual" aria-pressed="false" data-a="msManual">يدوي</button></div></div>
+        <div class="grp"><label><span data-a="msNPrograms">عدد البرامج</span><input class="vin" data-m="programs" inputmode="numeric" dir="ltr"></label><label><span data-a="msEpisodes">إجمالي الحلقات</span><input class="vin" data-m="episodes" inputmode="numeric" dir="ltr"></label><label><span data-a="msRecorded">تم التسجيل</span><input class="vin" data-m="recorded" inputmode="numeric" dir="ltr"></label><label><span data-a="msProduced">تم الإنتاج</span><input class="vin" data-m="produced" inputmode="numeric" dir="ltr"></label></div>
+        <p class="hint" id="ms-centre"></p>
+        <div class="gt" data-a="msStudio">الاستوديو</div>
+        <div class="grp two"><label><span data-a="msSessions">جلسات التصوير</span><input class="vin" data-m="sessions" inputmode="numeric" dir="ltr"></label><label><span data-a="msHours">ساعات التصوير</span><input class="vin" data-m="hours" inputmode="decimal" dir="ltr"></label><span class="hint note" id="ms-booked"></span></div>
+      </div>
+      <div class="table"><table><thead><tr><th>#</th><th data-a="thProgram">البرنامج</th><th data-a="thPresenter">المقدّم</th><th data-a="thType">النوع</th><th data-a="thEpisodes">الحلقات</th><th data-a="thRecording">التسجيل</th><th data-a="thEditing">المونتاج</th><th data-a="thDue">موعد الانتهاء</th><th data-a="thStatus">الحالة</th><th></th></tr></thead><tbody id="programs-rows"></tbody></table></div>
+    </section>
+
+    <section data-panel="bookings" hidden>
+      <header><h1 data-a="tabBookings">حجوزات الاستوديو</h1><div class="vtools"><span class="vtools" id="xls-tools" hidden><select id="xls-month" class="vin" aria-label="شهر التحميل" data-aa="xlsMonth"></select><button type="button" class="btn xls" id="xls-btn" data-a="xlsBtn">تحميل إكسل</button></span><button type="button" class="btn" id="reload-bookings" data-a="refresh">تحديث</button></div></header>
+      <div class="table"><table><thead><tr><th data-a="thWhen">الموعد</th><th data-a="fName">الاسم</th><th data-a="email">البريد الإلكتروني</th><th data-a="thPhone">الهاتف</th><th data-a="thTitle">العنوان</th><th data-a="thContent">المحتوى (السكريبت)</th><th data-a="thNotes">ملاحظات</th><th></th></tr></thead><tbody id="bookings-rows"></tbody></table></div>
+    </section>
+
+    <section data-panel="views" hidden>
+      <header><h1 data-a="tabViews">المشاهدات</h1><div class="vtools"><select id="views-month" class="vin" aria-label="الشهر"></select><button type="button" class="cta" id="save-views" data-a="saveViews">حفظ أرقام الشهر</button></div></header>
+      <p class="hint" data-a="viewsHint"></p>
+      <div class="table"><table style="min-width:760px"><thead><tr><th data-a="thPlatform">المنصة</th><th data-a="thMonthViews">مشاهدات الشهر</th><th data-a="thPrevMonth">الشهر السابق</th><th data-a="thLink">رابط الحساب</th><th></th></tr></thead><tbody id="views-rows"></tbody></table></div>
+      <div class="vfoot"><button type="button" class="btn" id="add-platform" data-a="addPlatform">+ إضافة منصة</button><span class="hint" id="views-total"></span></div>
+    </section>
+
+    <section data-panel="reports" hidden>
+      <header><h1 data-a="tabReports">التقارير</h1><div class="vtools"><button type="button" class="cta" id="rep-png" data-a="dlPng">تنزيل صورة PNG</button><button type="button" class="cta" id="rep-pdf" data-a="dlPdf">تنزيل PDF</button></div></header>
+      <p class="hint" data-a="reportsHint"></p>
+      <div class="rtools">
+        <div class="seg" id="rep-kind" role="group"><button type="button" data-kind="month" aria-pressed="true" data-a="repMonth">شهري</button><button type="button" data-kind="quarter" aria-pressed="false" data-a="repQuarter">ربع سنوي</button><button type="button" data-kind="year" aria-pressed="false" data-a="repYear">سنوي</button></div>
+        <select id="rep-n" class="vin" data-aa="repPeriod" aria-label="الفترة"></select>
+        <select id="rep-year" class="vin" data-aa="repYearSel" aria-label="السنة"></select>
+        <div class="seg" id="rep-theme" role="group"><button type="button" data-rtheme="day" aria-pressed="true" data-a="repDay">نهاري</button><button type="button" data-rtheme="night" aria-pressed="false" data-a="repNight">ليلي</button></div>
+      </div>
+      <div class="rep-frame" id="rep-frame"><div class="rep-page" id="rep-out"></div></div>
+    </section>
+
+    <section data-panel="users" hidden>
+      <header><h1 data-a="tabUsers">المستخدمون والصلاحيات</h1><button type="button" class="cta" id="add-user" data-a="addUser">+ إضافة مستخدم</button></header>
+      <div class="table"><table><thead><tr><th data-a="fName">الاسم</th><th data-a="email">البريد الإلكتروني</th><th data-a="fRole">الصلاحية</th><th></th></tr></thead><tbody id="users-rows"></tbody></table></div>
+      <h2 class="roles-title" data-a="rolesTitle">ماذا تستطيع كل صلاحية؟</h2>
+      <ul class="roles-guide" id="roles-guide"></ul>
+      <p class="hint" id="roles-all" style="margin-top:12px"></p>
+    </section>
+
+    <section data-panel="account" hidden>
+      <header><h1 data-a="tabAccount">حسابي</h1></header>
+      <form class="tile form" id="password-form" style="max-width:460px">
+        <h2 data-a="changePw">تغيير كلمة المرور</h2>
+        <label><span data-a="curPw">كلمة المرور الحالية</span><input name="current" type="password" required autocomplete="current-password"></label>
+        <label><span data-a="newPw">كلمة المرور الجديدة (8 أحرف على الأقل)</span><input name="next" type="password" required minlength="8" autocomplete="new-password"></label>
+        <div class="actions"><button type="submit" class="btn primary" data-a="save">حفظ</button></div>
+      </form>
+    </section>
+  </main>
+</div>
+
+<dialog class="sheet" id="program-dlg" aria-labelledby="program-title">
+  <div class="sheet-head"><h2 id="program-title"></h2><button type="button" class="x" data-close data-aa="close" aria-label="إغلاق">×</button></div>
+  <form class="sheet-body form two" id="program-form">
+    <input type="hidden" name="pid">
+    <label><span data-a="fAr">اسم البرنامج بالعربي</span><input name="ar" required maxlength="120"></label>
+    <label><span data-a="fEn">الاسم بالإنجليزي</span><input name="en" maxlength="120" dir="ltr"></label>
+    <label><span data-a="fPresenter">المقدّم</span><input name="presenter" required maxlength="80" list="presenters"></label>
+    <label><span data-a="fPresenterEn">اسم المقدّم بالإنجليزي</span><input name="presenterEn" maxlength="80" dir="ltr"></label>
+    <label><span data-a="fType">نوع البرنامج</span><select name="type"><option value="series" data-a="optSeries">سلسلة (Series)</option><option value="shorts" data-a="optShorts">مقاطع قصيرة (Shorts)</option><option value="course" data-a="optCourse">دورة / مستوى</option><option value="single" data-a="optSingle">حلقة واحدة</option><option value="" data-a="none">بدون</option></select></label>
+    <label><span data-a="fLang">اللغة</span><select name="lang"></select></label>
+    <label><span data-a="fTotal">عدد الحلقات</span><input name="total" type="number" min="0" max="9999" inputmode="numeric"></label>
+    <label><span data-a="fRecorded">الحلقات المسجّلة</span><input name="recorded" type="number" min="0" max="9999" inputmode="numeric"></label>
+    <label><span data-a="fDone">الحلقات المُنتَجة (مونتاج وإخراج)</span><input name="done" type="number" min="0" max="9999" inputmode="numeric"></label>
+    <label><span data-a="thDue">موعد الانتهاء</span><input name="due" type="date"></label>
+    <label><span data-a="fOrder">الترتيب في الصفحة</span><input name="order" type="number" min="0" max="9999" inputmode="numeric"></label>
+    <label class="full"><span data-a="fLink">رابط العرض (فيديوهات البرنامج أو مجلد العمل عليه)</span><input name="link" type="url" maxlength="500" dir="ltr" placeholder="https://"></label>
+    <div class="full eps-box">
+      <div class="eps-head"><span data-a="fEps">روابط الحلقات (رابط لكل حلقة، تظهر أرقامها في نافذة العرض)</span><button type="button" class="btn small" id="eps-bulk-btn" data-a="epsBulk">لصق عدة روابط دفعة واحدة</button></div>
+      <div id="eps-bulk" hidden><textarea id="eps-bulk-text" rows="5" dir="ltr" placeholder="https://vimeo.com/...&#10;https://vimeo.com/..."></textarea><div class="eps-bulk-acts"><span class="hint" data-a="epsBulkHint">كل رابط في سطر، بالترتيب من الحلقة 1</span><button type="button" class="btn small primary" id="eps-bulk-apply" data-a="epsApply">توزيع على الحلقات</button></div></div>
+      <div class="eplinks" id="eps-rows"></div>
+    </div>
+    <label class="full"><span data-a="fNote">ملاحظة تظهر كوسم (مثل: أكاديمية المسلم الجديد)</span><input name="note" maxlength="120"></label>
+    <label class="check full"><input name="finished" type="checkbox"> <span data-a="fFinished">البرنامج منتهٍ</span></label>
+    <p class="msg err full" id="program-err" hidden></p>
+    <div class="actions full"><button type="button" class="btn" data-close data-a="cancel">إلغاء</button><button type="submit" class="btn primary" data-a="saveProgram">حفظ البرنامج</button></div>
+  </form>
+  <datalist id="presenters"></datalist>
+</dialog>
+
+<dialog class="sheet" id="user-dlg" aria-labelledby="user-title">
+  <div class="sheet-head"><h2 id="user-title"></h2><button type="button" class="x" data-close data-aa="close" aria-label="إغلاق">×</button></div>
+  <form class="sheet-body form" id="user-form">
+    <label><span data-a="fName">الاسم</span><input name="name" maxlength="80" required></label>
+    <label><span data-a="email">البريد الإلكتروني</span><input name="email" type="email" required dir="ltr"></label>
+    <label><span data-a="fRole">الصلاحية</span><select name="role"><option value="team" data-a="roleTeam">فريق الاستوديو</option><option value="crew" data-a="roleCrewLong">فريق الإنتاج (التسجيل والمونتاج)</option><option value="editor" data-a="roleEditor">محرر البرامج</option><option value="admin" data-a="roleAdmin">مدير الموقع</option></select></label>
+    <label><span id="pw-label">كلمة المرور (8 أحرف على الأقل)</span><input name="password" type="password" minlength="8" autocomplete="new-password"></label>
+    <p class="msg err" id="user-err" hidden></p>
+    <div class="actions"><button type="button" class="btn" data-close data-a="cancel">إلغاء</button><button type="submit" class="btn primary" data-a="save">حفظ</button></div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="read-dlg" aria-labelledby="read-title">
+  <div class="sheet-head"><h2 id="read-title"></h2><button type="button" class="x" data-close data-aa="close" aria-label="إغلاق">×</button></div>
+  <div class="sheet-body" id="read-body"></div>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<button type="button" class="chip-btn to-top" id="to-top" data-aa="toTop" aria-label="العودة إلى الأعلى"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5L12 5l6.5 6.5"/></svg></button>
+
+<script src="config.js?v=20261024152904"></script>
+<script src="common.js?v=20261108120000"></script>
+<script src="reports.js?v=20261104101000"></script>
+<script src="xlsx-lite.js?v=20261108120000"></script>
+<script src="admin.js?v=20261108120000"></script>
+</body>
+</html>

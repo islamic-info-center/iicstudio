@@ -1,0 +1,4 @@
+# Netlify: the site is these files as they are (no build); the WhatsApp webhook is a function.
+[build]
+  publish = "."
+  functions = "netlify/functions"

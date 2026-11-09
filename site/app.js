@@ -227,7 +227,7 @@
       const vimeo = id => { const h = hashOf(id); return {src: `https://player.vimeo.com/video/${id}${h ? "?h=" + h : ""}`, host: "Vimeo"}; };
       if ((m = path.match(/\/review\/(\d{5,})/i))) return {src: `https://player.vimeo.com/video/${m[1]}`, host: "Vimeo"};   // the hash after it is the review page's, not the video's
       if ((m = path.match(/\/videos?\/(\d{5,})/i)) || (m = q.match(/[?&]video=(\d{5,})/i))) return vimeo(m[1]);
-      if ((m = path.match(/\/(?:showcase|album)\/(\d+)/i))) return {src: `https://vimeo.com/showcase/${m[1]}/embed`, host: "Vimeo"};
+      if ((m = path.match(/\/(?:showcase|album)\/(\d+)/i))) return {src: `https://vimeo.com/showcase/${m[1]}/embed2`, host: "Vimeo"};
       if (/\/(?:user|users|folder|folders|event|events|groups)\/|\/manage\/(?!videos)/i.test(path)) return {src: "", host: "Vimeo"};
       // vimeo.com/<id>, vimeo.com/<id>/<private hash>, vimeo.com/channels/<name>/<id>: the first number in the path is the video
       if ((m = path.match(/\/(\d{5,})(?=\/|$)/))) return vimeo(m[1]);

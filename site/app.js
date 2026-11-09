@@ -216,15 +216,26 @@
   // ---------- episode player: a window that plays each episode's link, with a button per episode ----------
   let player = null;   // {id, ep}
   function embedOf(u){
-    u = String(u || "");
+    u = String(u || "").trim();
     let m;
-    if ((m = u.match(/player\.vimeo\.com\/video\/(\d+)/i))) return {src: u, host: "Vimeo"};
-    if ((m = u.match(/vimeo\.com\/.*\/video\/(\d{6,})/i))) return {src: `https://player.vimeo.com/video/${m[1]}`, host: "Vimeo"};
-    if ((m = u.match(/vimeo\.com\/showcase\/(\d+)/i))) return {src: `https://vimeo.com/showcase/${m[1]}/embed`, host: "Vimeo"};
-    // the first number in the path is the video; a second part is its private hash (it may start with digits)
-    if ((m = u.match(/vimeo\.com\/(?:[^?#]*?\/)?(\d{6,})(?:\/([0-9a-f]{6,}))?(?=[\/?#]|$)/i))){ const h = m[2] || (u.match(/[?&]h=([0-9a-f]+)/i) || [])[1]; return {src: `https://player.vimeo.com/video/${m[1]}${h ? "?h=" + h : ""}`, host: "Vimeo"}; }
+    if (/player\.vimeo\.com\/video\/\d+/i.test(u)) return {src: u, host: "Vimeo"};
+    if (/vimeo\.com\//i.test(u)){
+      // Each episode needs its own video number. Look for it where Vimeo puts it, so a link to a showcase, a review page
+      // or a user's page never falls back to a number that is the same for every episode (the user's or the showcase's).
+      const path = u.replace(/^https?:\/\/[^\/]+/i, "").split(/[?#]/)[0], q = u.split("#")[0];
+      const hashOf = id => { const a = path.match(new RegExp("\\/" + id + "\\/([0-9a-f]{6,})(?=\\/|$)", "i")); return a ? a[1] : (q.match(/[?&]h=([0-9a-f]+)/i) || [])[1]; };
+      const vimeo = id => { const h = hashOf(id); return {src: `https://player.vimeo.com/video/${id}${h ? "?h=" + h : ""}`, host: "Vimeo"}; };
+      if ((m = path.match(/\/review\/(\d{5,})/i))) return {src: `https://player.vimeo.com/video/${m[1]}`, host: "Vimeo"};   // the hash after it is the review page's, not the video's
+      if ((m = path.match(/\/videos?\/(\d{5,})/i)) || (m = q.match(/[?&]video=(\d{5,})/i))) return vimeo(m[1]);
+      if ((m = path.match(/\/(?:showcase|album)\/(\d+)/i))) return {src: `https://vimeo.com/showcase/${m[1]}/embed`, host: "Vimeo"};
+      if (/\/(?:user|users|folder|folders|event|events|groups)\/|\/manage\/(?!videos)/i.test(path)) return {src: "", host: "Vimeo"};
+      // vimeo.com/<id>, vimeo.com/<id>/<private hash>, vimeo.com/channels/<name>/<id>: the first number in the path is the video
+      if ((m = path.match(/\/(\d{5,})(?=\/|$)/))) return vimeo(m[1]);
+      return {src: "", host: "Vimeo"};
+    }
     if ((m = u.match(/(?:youtu\.be\/|[?&]v=|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/))) return {src: `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0`, host: "YouTube"};
-    if ((m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=)([\w-]{10,})/))) return {src: `https://drive.google.com/file/d/${m[1]}/preview`, host: "Google Drive"};
+    if ((m = u.match(/youtube\.com\/.*[?&]list=([\w-]+)/))) return {src: `https://www.youtube-nocookie.com/embed/videoseries?list=${m[1]}&rel=0`, host: "YouTube"};
+    if ((m = u.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([\w-]{10,})/))) return {src: `https://drive.google.com/file/d/${m[1]}/preview`, host: "Google Drive"};
     let host = ""; try { host = new URL(u).hostname.replace(/^www\./, ""); } catch (e) {}
     return {src: "", host: host};
   }
